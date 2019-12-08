@@ -20,6 +20,7 @@ class Calculator extends Component{
             dataDot: false,
             acFlag: false,
             dataPm: null,
+            negFlag: false,
             dataPercentage: null,
             funcCache: [],
             numCache: [],
@@ -29,14 +30,12 @@ class Calculator extends Component{
 
         this.eventManager = this.eventManager.bind(this);
         this.handleClick = this.handleClick.bind(this);
+        this.cancel = this.cancel.bind(this);
     }
 
     handleClick(e){
-        this.setState({
 
-        })
-        this.eventManager(e.currentTarget.dataset.number);
-        console.log(e.currentTarget.dataset);
+        this.eventManager(e.currentTarget.dataset);
 
     }
 
@@ -44,25 +43,30 @@ class Calculator extends Component{
         console.log(e);
     }
 
-    eventManager ( dataNumber, dataOperator, dataDot, dataEquals, dataAc, dataPm ) {
-        // console.log(dataNumber);
+    eventManager ( inputObject ) {
         let cache = [],
             MAXDIGITS = this.state.MAXDIGITS,
-            resultDisplay = '',
+            resultDisplay = this.state.resultDisplay,
             displayLength = this.state.displayLength,
             numCache = [],
             funcCache = [],
-            dataPercentage = this.state.dataPercentage,
             neg = 0;
 
-        if( dataNumber ) {
+        if( inputObject.type === 'number' ) {
+
+        
+            if(this.state.negFlag){
+                this.cancel();
+            }
   
           if ( cache.length < MAXDIGITS ) {
 
                 cache = this.state.cache;  
-                cache.push ( dataNumber );
+                cache.push ( inputObject.number );
                 this.setState({
-                    cache
+                    cache,
+                    cancelBtnDisplay: 'C',
+                    acFlag: true
                 })
   
                 displayLength = cache.join( '' ).length;
@@ -83,25 +87,35 @@ class Calculator extends Component{
           }
   
   
-        } else if ( dataOperator ) {
+        } else if ( inputObject.type === 'operator' ) {
   
-            cache = [];
-            funcCache.push( dataOperator.value );
+            // cache = [];
+            funcCache = this.state.funcCache;
+            funcCache.push( Object.keys(inputObject)[1] );
+            this.setState({
+                cache: [],
+                funcCache,
+                dataDot: false
+            })
   
             if ( !isNaN( resultDisplay ) ) {
   
-              numCache.push( parseFloat( resultDisplay ) );
+                numCache = this.state.numCache;
+                numCache.push( parseFloat( resultDisplay ) );
+                this.setState({
+                    numCache
+                })
   
             }
   
   
-            if ( dataOperator.value === 'equals' ){
+            if ( inputObject.equals ){
   
-                // calculateSomeShit( numCache, funcCache[0], true );
+                this.calculateSomeShit( numCache, funcCache[0], true );
   
             } else {
   
-            //   calculateSomeShit( numCache, dataOperator.value, 1 );
+                this.calculateSomeShit( numCache, Object.keys(inputObject)[1], 1 );
   
             }
             
@@ -112,9 +126,15 @@ class Calculator extends Component{
             }
             
   
-          } else if ( dataDot ) {
+          } else if ( inputObject.dot ) {
   
             if ( !this.state.dataDot ){
+            
+                this.setState({
+                    dataDot: true
+                })
+
+                cache = this.state.cache;
   
               if (cache.length === 0) {
   
@@ -125,57 +145,73 @@ class Calculator extends Component{
                   cache.push('.');
   
                 }
+
+                this.setState({
+                    cache
+                })
   
-                this.state.dataDot = true;
             }
   
   
-          } else if (dataAc) {
+          } else if ( inputObject.ac ) {
   
-            if ( this.state.acFlag && funcCache.length > 0 ) {
+            if ( this.state.acFlag && this.state.funcCache.length > 0 ) {
   
-              this.setState({
-                cache: [],
-                resultDisplay: '0',
-                acFlag: false,
-                cancelBtnDisplay: 'AC'
-              })
+              this.cancel();
   
             } else {
   
-            //   clearAll();
+            this.setState({
+                cache: [],
+                numCache:[],
+                funcCache: [],
+                result: 0,
+                dotFlag: false,
+                negFlag: false,
+                acFlag: false,
+                resultDisplay: '0',
+                cancelBtnDisplay: 'AC',
+                dataDot: false
+            })//   clearAll();
             console.log('Reset Calculator');
   
             }
             
   
-          } else if ( dataPm ) {
+          } else if ( inputObject.pm ) {
+
+            cache = this.state.cache;
   
             if ( cache.length > 0 ) {
   
                 neg = (-1 * parseFloat(cache.join('')));
 
                 this.setState({
-                    resultDisplay: neg
+                    resultDisplay: neg,
+                    negFlag: true
                 })
   
             }
   
-          } else if ( dataPercentage ) {
+          } else if ( inputObject.percentage ) {
 
             let percentage = 0;
+            cache = this.state.cache;
   
             if ( cache.length > 0 ) {
-  
+
                 percentage = (parseFloat(cache.join('')) / 100 );
-                this.setState(
-                    {
-                        cache: [],
-                        resultDisplay: percentage
-                    }
-                )
   
+            } else {
+                percentage = (parseFloat(this.state.resultDisplay) / 100 );
             }
+
+            this.setState(
+                {
+                    cache: [],
+                    resultDisplay: percentage
+                }
+            )
   
           } else {
   
@@ -184,7 +220,45 @@ class Calculator extends Component{
   
       }
   
-    
+    cancel(){
+        this.setState({
+            cache: [],
+            resultDisplay: '0',
+            acFlag: false,
+            cancelBtnDisplay: 'AC',
+            dataDot: false,
+            negFlag: false
+          }) 
+    }
+
+    calculateSomeShit ( numCache, func, updateDisplay ) {
+
+        var result, 
+            calculate = CalcFunc.calculate,
+            funcCache = this.state.funcCache;
+
+        if ( numCache[1] ) {
+
+          result = calculate(numCache[0], numCache[1], CalcFunc[func]);
+          numCache[1] = result;
+          numCache.shift();
+          funcCache.shift();
+
+          if ( updateDisplay ) {
+
+            this.setState({
+                resultDisplay: result
+            })
+
+          }
+          
+        } else {
+
+          return;
+
+        }
+
+    }
 
     render(){
         return(
