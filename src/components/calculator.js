@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import Screen from './screen';
 import CalcFunc from '../helpers/calulator';
-import Button from './button';
+import EventUtil from '../helpers/event_util';
 
 class Calculator extends Component{
     constructor(props){
@@ -30,17 +30,18 @@ class Calculator extends Component{
 
         this.eventManager = this.eventManager.bind(this);
         this.handleClick = this.handleClick.bind(this);
+        this.handleKeyPress = this.handleKeyPress.bind(this);
         this.cancel = this.cancel.bind(this);
+    }
+
+    componentWillMount(){
+        EventUtil.addEvent(document, 'keypress', this.handleKeyPress);
     }
 
     handleClick(e){
 
         this.eventManager(e.currentTarget.dataset);
 
-    }
-
-    handleKeyPress(e){
-        console.log(e);
     }
 
     eventManager ( inputObject ) {
@@ -260,6 +261,90 @@ class Calculator extends Component{
 
     }
 
+    // Handle Keyboard Events
+    handleKeyPress ( evt ) {
+
+        let invalidKey = false,
+            inputObject = {};
+
+        
+        if ( evt.keyCode === 61 || evt.keyCode === 13 ) {
+  
+          inputObject = { type: "operator", equals: true };
+  
+        } else if ( evt.keyCode >= 42 && evt.keyCode <= 47 ) { // fix
+          
+          switch ( evt.keyCode ) {
+  
+              case 42:
+  
+                inputObject = { type: "operator", multiply: true };
+                break;
+  
+              case 43:
+  
+                inputObject = { type: "operator", plus: true };
+                break;
+  
+              case 44:
+  
+                invalidKey = true;
+                break;
+  
+              case 45:
+  
+                inputObject = { type: "operator", minus: true };
+                break;
+  
+              case 46:
+  
+                inputObject = { type: "dot", dot: true };
+                break;
+  
+              case 47:
+  
+                inputObject = { type: "operator", divide: true };
+                break;
+  
+              default:
+  
+                invalidKey = true;
+                break;
+          }
+  
+        } else if ( evt.keyCode >= 48 && evt.keyCode <= 57 ) {
+            
+            inputObject = { type: "number", number: evt.key };
+  
+         } else if ( evt.keyCode === 37) {
+  
+            inputObject = { type: "sf", percentage: true };
+  
+         } else if ( evt.keyCode === 99 ) {
+  
+            inputObject = { type: "sf", ac: true };
+  
+         } else if ( evt.keyCode === 112 ) {
+  
+            inputObject = { type: "sf", pm: true };
+  
+         } else {
+  
+          invalidKey = true;
+  
+         }
+  
+        // Call eventManager
+        if ( !invalidKey && evt.keyCode !== 16 ) {
+  
+          this.eventManager ( inputObject );
+  
+        }
+        
+  
+      };
+  
+
     render(){
         return(
 
@@ -372,33 +457,6 @@ class Calculator extends Component{
 //     } else {
 
 //       return result;
-
-//     }
-
-// }
-
-// function calculateSomeShit ( numCache, func, updateDisplay ) {
-
-//     var result, calculate = CalcFunc.calculate;
-
-//     if ( numCache[1] ) {
-
-//       result = calculate(numCache[0], numCache[1], CalcFunc[func]);
-//       numCache[1] = result;
-//       numCache.shift();
-//       funcCache.shift();
-
-//       if ( updateDisplay ) {
-
-//         Calculator.setState(
-//             resultDisplay: formatResult( result, true )
-//         );
-
-//       }
-      
-//     } else {
-
-//       return;
 
 //     }
 
