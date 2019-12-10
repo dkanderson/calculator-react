@@ -25,14 +25,35 @@ const SpecialFunctions = {
             // Raise the displayed value to the power of the next value entered
     
        } else if ( inputObject.ettx ) {
-            // E to the power of the displayed value    
-            x = Math.pow(Math.E, parseFloat(this.state.resultDisplay));
-            updateValue(x, this);
+
+            if ( !this.state.scnd ) {
+
+                // E to the power of the displayed value    
+                x = Math.pow(Math.E, parseFloat(this.state.resultDisplay));
+                updateValue(x, this);
+
+            } else {
+
+                // Raise the displayed value to the power of the next value entered
+                
+            }
+            
 
        } else if ( inputObject.tenttx ) {
-            // 10 to the power of the displayed value
-            x = Math.pow(10, parseFloat(this.state.resultDisplay));
-            updateValue(x, this);
+            
+            if ( !this.state.scnd ) {
+
+                 // 10 to the power of the displayed value
+                x = Math.pow(10, parseFloat(this.state.resultDisplay));
+                updateValue(x, this);
+
+            } else {
+
+                // 2 to the power of the displayed value
+                x = Math.pow(2, parseFloat(this.state.resultDisplay));
+                updateValue(x, this);
+            }
+           
 
        } else if ( inputObject.onex ) {
             // Calculate the inverse of the displayed value
@@ -53,32 +74,89 @@ const SpecialFunctions = {
             //  Compute the nth root of the value displayed, where n is the next value entered
 
        } else if ( inputObject.ln) {
-            // Calculate the natural logarithm of the value displayed
-            x = Math.log(parseFloat(this.state.resultDisplay));
-            updateValue(x, this); 
+
+            if(!this.state.scnd){
+
+                // Calculate the natural logarithm of the value displayed
+                x = Math.log(parseFloat(this.state.resultDisplay));
+                updateValue(x, this); 
+
+            } else {
+
+                // Calculate the logarithm of the value displayed with the base of the next value entered
+                
+
+            }
+            
 
        } else if ( inputObject.logten) {
-            // Calculate the base 10 logarithm of the displayed value
-            x = Math.log10(parseFloat(this.state.resultDisplay));
-            updateValue(x, this); 
+            
+            if ( !this.state.scnd ) {
+
+                // Calculate the base 10 logarithm of the displayed value
+                x = Math.log10(parseFloat(this.state.resultDisplay));
+                updateValue(x, this); 
+
+            } else {
+
+                // Calculate the base 2 logarithm of the displayed value
+                x = Math.log2(parseFloat(this.state.resultDisplay));
+                updateValue(x, this); 
+
+            }
+            
 
         } else if ( inputObject.factorial) {
             // calculate factorial of the displayed value
+            updateValue(factorial(parseFloat(this.state.resultDisplay)), this);
 
        } else if ( inputObject.sin) {
-            // calculate the sine of the displayed value
-            x = Trig.sin(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
-            updateValue(x, this); 
+
+            if ( !this.state.scnd ) {
+
+                // calculate the sine of the displayed value
+                x = Trig.sin(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
+                updateValue(x, this); 
+
+            } else {
+
+                // calculate the inverse sine of the displayed value
+                x = Trig.asin(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
+                updateValue(x, this); 
+            }
+            
 
        } else if ( inputObject.cos) {
-            //  Compute the cosine of the displayed value
-            x = Trig.cos(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
-            updateValue(x, this); 
 
+            if ( !this.state.scnd ) {
+
+                //  Compute the cosine of the displayed value
+                x = Trig.cos(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
+                updateValue(x, this); 
+
+            } else {
+
+                //  Compute the inverse cosine of the displayed value
+                x = Trig.acos(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
+                updateValue(x, this); 
+
+            }
+            
        } else if ( inputObject.tan) {
-            // Calculate the tangent of the displayed value
-            x = Trig.tan(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
-            updateValue(x, this); 
+
+            if (!this.state.scnd ) {
+
+                // Calculate the tangent of the displayed value
+                x = Trig.tan(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
+                updateValue(x, this); 
+
+            } else { 
+
+                // Calculate the tangent of the displayed value
+                x = Trig.atan(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
+                updateValue(x, this); 
+            }
+            
 
        } else if ( inputObject.e) {
             // Enter e
@@ -103,19 +181,52 @@ const SpecialFunctions = {
             })
 
        } else if ( inputObject.sinh) {
-            //  Compute the hyperbolic sine of the displayed value
-            x = Trig.sinh(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
-            updateValue(x, this); 
+            
+            if ( !this.state.scnd ) {
+                //  Compute the hyperbolic sine of the displayed value
+                x = Trig.sinh(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
+                updateValue(x, this); 
+            } else {
+
+                //  Compute the hyperbolic sine of the displayed value
+                x = Trig.asinh(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
+                updateValue(x, this); 
+            }
+            
 
        } else if ( inputObject.cosh) {
-            // Calculate the hyperbolic cosine of the displayed value
-            x = Trig.cosh(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
-            updateValue(x, this); 
+
+            if( !this.state.scnd ) {
+
+                // Calculate the hyperbolic cosine of the displayed value
+                x = Trig.cosh(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
+                updateValue(x, this); 
+
+            } else {
+
+                // Calculate the hyperbolic cosine of the displayed value
+                x = Trig.acosh(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
+                updateValue(x, this); 
+
+            }
+            
 
        } else if ( inputObject.tanh) {
-            // Calculate the hyperbolic tangent of the displayed value
-            x = Trig.tanh(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
-            updateValue(x, this); 
+
+            if ( !this.state.scnd ) {
+
+                // Calculate the hyperbolic tangent of the displayed value
+                x = Trig.tanh(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
+                updateValue(x, this); 
+
+            } else {
+
+                // Calculate the hyperbolic tangent of the displayed value
+                x = Trig.atanh(parseFloat(this.state.resultDisplay), this.state.RadDeg === 'Deg');
+                updateValue(x, this); 
+
+            }
+            
 
         } else if ( inputObject.pi) {
             // enter pi
@@ -157,6 +268,17 @@ function formatResult ( result, PRECISION, MAXDIGITS ) {
 
     }
 
+}
+
+function factorial(x) 
+{ 
+
+  if (x === 0)
+    {
+        return 1;
+    }
+  return x * factorial(x-1);
+         
 }
 
 export default SpecialFunctions;
