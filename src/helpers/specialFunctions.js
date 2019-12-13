@@ -346,12 +346,34 @@ function loadCache( resultDisplay, inputObject, self ){
 
 function factorial(x) 
 { 
+  let result = x,
+        fac = x;
 
-  if (x === 0)
-    {
-        return 1;
+    if ( x < 1 && x > 0 ) {
+        return 'Not a Number';
     }
-  return x * factorial(x-1);
+
+    if(x === 0) {
+        return 1;
+    } else if( x >= 0) {
+        
+        for(let i=0; i < (x - 1); i+=1) {
+            fac = fac-1;
+            result = result * fac;
+            }
+
+    } else {
+        result = result * -1;
+        fac = fac * -1;
+
+        for(let i=0; i < ((x*-1) - 1); i+=1) {
+            fac = fac-1;
+            result = result * fac;
+            }
+        result = result * -1;
+    }
+  
+    return result;
          
 }
 
