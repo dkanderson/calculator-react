@@ -191,17 +191,39 @@ button {
   animation: throbb 0.5s cubic-bezier(0.6, -0.28, 0.735, 0.045);
 }
 .nav-buttons .control-btns button {
-  width: 10px;
-  height: 10px;
-  border-radius: 5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
   padding: 0;
   margin: 0 3px 0 0;
   transition: ease .31s;
 }
-.nav-buttons .control-btns button.close {
+
+.nav-buttons .control-btns button i{
+  line-height: 10px;
+  text-align: center;
+  display: inline-block;
+  position: relative;
+  top: -1px;
+  padding: 0;
+  font-style: normal;
+  font-size: 12px;
+  font-family: 'Courier New', Courier, monospace;
+  opacity: 0;
+}
+
+.nav-buttons .control-btns button:hover i{
+  opacity: 1;
+}
+
+.nav-buttons .control-btns button.close-btn i{
+  top: -2px;
+}
+
+.nav-buttons .control-btns button.close-btn {
   background-color: #F44336;
 }
-.nav-buttons .control-btns button.minimize {
+.nav-buttons .control-btns button.minimize-btn {
   background-color: #FFCA28;
 }
 .nav-buttons .control-btns button.flip {
