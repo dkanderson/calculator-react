@@ -1,19 +1,18 @@
-import React, { Component } from 'react';
+import React from 'react';
 
-class NavButtons extends Component{
-    
-    render(){
-        return(
+function NavButtons(props){
+        
+    return(
             <header className="nav-buttons">
                 <nav id="nav-buttons" className="control-btns flip-out">
                     <button className="close" data-close></button>
                     <button className="minimize" data-minimize></button>
-                    <button id="flipper" className="flip" data-flip></button>
+                    <button id="flipper" className="flip" data-flip onClick={props.toggle}></button>
                 </nav>
             </header> 
 
         )
-    }
+    
 }
 
 export default NavButtons;
