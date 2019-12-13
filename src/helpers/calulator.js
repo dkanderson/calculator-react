@@ -62,7 +62,60 @@ var calculator = {
         }
 
         return total;
+    },
+
+    xtty: function() {
+
+        var i = 0,
+            base = Array.prototype.shift.apply(arguments),
+            exponent = arguments[i];
+
+        return Math.pow(base, exponent);
+
+    },
+
+    ettx: function() {
+
+        var i = 0,
+            exponent = Array.prototype.shift.apply(arguments),
+            base = arguments[i];
+
+        return Math.pow(base, exponent);
+
+
+    },
+
+    nthroot: function() {
+
+        var i = 0,
+            x = Array.prototype.shift.apply(arguments),
+            y = arguments[i];
+
+        return Math.pow(x, 1/y);
+
+    },
+
+    ln: function() {
+
+        var i = 0,
+        x = Array.prototype.shift.apply(arguments),
+        base = arguments[i];
+
+        return Math.log(x) / Math.log(base);
+
+    },
+
+    ee: function() {
+
+        var i = 0,
+            base = Array.prototype.shift.apply(arguments),
+            exponent = arguments[i];
+
+        return Math.pow(base, exponent);
+
     }
+
+
 
 };
 

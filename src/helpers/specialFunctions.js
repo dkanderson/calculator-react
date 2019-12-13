@@ -1,4 +1,5 @@
 import Trig from './trig';
+import Mem from './mem';
 
 let x = 0;
 
@@ -12,6 +13,44 @@ const SpecialFunctions = {
             })
         }
 
+        if( inputObject.lb ) {
+            // open bracket
+            this.setState({
+                lb: true
+            })
+
+        } else if( inputObject.rb ) {
+            // close bracket
+            loadCache(this.state.resultDisplay, inputObject, this);
+            if( this.state.funcCache[0] !== 'equals' ){
+                this.calculateSomeShit( this.state.numCache, this.state.funcCache[0], true );
+            }else{
+                return;
+            }
+            this.setState({
+                lb: false
+            })
+
+        }
+
+        if(inputObject.mplus){
+            // Add the displayed value to the memory
+            Mem.mplus();
+
+        } else if (inputObject.mminus) {
+            // Subtract the displayed value from the memory
+            Mem.mminus();
+
+        } else if (inputObject.mr) {
+            // Recall the value stored in memory
+            Mem.mrecall();
+
+        } else if (inputObject.mc) {
+            // Clear the memory
+            Mem.mcancel();
+
+        }
+
        if(inputObject.xsquared){
             // displayed value squared
             x = Math.pow(parseFloat(this.state.resultDisplay), 2);
@@ -23,6 +62,7 @@ const SpecialFunctions = {
             updateValue(x, this);
        } else if ( inputObject.xtty ) {
             // Raise the displayed value to the power of the next value entered
+            loadCache(this.state.resultDisplay, inputObject, this);
     
        } else if ( inputObject.ettx ) {
 
@@ -35,6 +75,7 @@ const SpecialFunctions = {
             } else {
 
                 // Raise the displayed value to the power of the next value entered
+                loadCache(this.state.resultDisplay, inputObject, this);
                 
             }
             
@@ -72,6 +113,7 @@ const SpecialFunctions = {
 
        } else if ( inputObject.nthroot) {
             //  Compute the nth root of the value displayed, where n is the next value entered
+            loadCache(this.state.resultDisplay, inputObject, this);
 
        } else if ( inputObject.ln) {
 
@@ -84,7 +126,7 @@ const SpecialFunctions = {
             } else {
 
                 // Calculate the logarithm of the value displayed with the base of the next value entered
-                
+                loadCache(this.state.resultDisplay, inputObject, this);  
 
             }
             
@@ -166,6 +208,13 @@ const SpecialFunctions = {
 
         } else if ( inputObject.ee) {
             // Exponential Notation
+            this.setState({
+                exp: true
+            })
+            loadCache(this.state.resultDisplay, inputObject, this);
+            this.setState({
+                resultDisplay: '0'
+            })
 
        } else if ( inputObject.rad) {
             // toggle between degrees and radians
@@ -265,6 +314,31 @@ function formatResult ( result, PRECISION, MAXDIGITS ) {
     } else {
 
       return result;
+
+    }
+
+}
+
+function loadCache( resultDisplay, inputObject, self ){
+
+    let funcCache = [],
+        numCache = []
+    
+    funcCache = self.state.funcCache;
+    funcCache.push( Object.keys(inputObject)[1] );
+    self.setState({
+        cache: [],
+        funcCache,
+        dataDot: false
+    })
+
+    if ( !isNaN( resultDisplay ) ) {
+
+        numCache = self.state.numCache;
+        numCache.push( parseFloat( resultDisplay ) );
+        self.setState({
+            numCache
+        })
 
     }
 
