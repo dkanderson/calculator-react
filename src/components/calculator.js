@@ -2,6 +2,8 @@ import React, {Component} from 'react';
 import Screen from './screen';
 import CalcFunc from '../helpers/calulator';
 import EventUtil from '../helpers/event_util';
+import SpecialFunctions from '../helpers/specialFunctions';
+import Mem from '../helpers/mem';
 
 class Calculator extends Component{
     constructor(props){
@@ -24,7 +26,13 @@ class Calculator extends Component{
             dataPercentage: null,
             funcCache: [],
             numCache: [],
-            displayText: ''
+            displayText: '',
+            RadDeg: 'Deg',
+            scnd: false,
+            ee: false,
+            exp: false,
+            mem: 0,
+            lb: false
 
         }
 
@@ -32,6 +40,11 @@ class Calculator extends Component{
         this.handleClick = this.handleClick.bind(this);
         this.handleKeyPress = this.handleKeyPress.bind(this);
         this.cancel = this.cancel.bind(this);
+        SpecialFunctions.sf = SpecialFunctions.sf.bind(this);
+        Mem.mrecall = Mem.mrecall.bind(this);
+        Mem.mplus = Mem.mplus.bind(this);
+        Mem.mminus = Mem.mminus.bind(this);
+        Mem.mcancel = Mem.mcancel.bind(this);
     }
 
     componentWillMount(){
@@ -54,27 +67,31 @@ class Calculator extends Component{
             neg = 0;
 
         if( inputObject.type === 'number' ) {
-
         
             if(this.state.negFlag){
                 this.cancel();
             }
   
-          if ( cache.length < MAXDIGITS ) {
-
-                cache = this.state.cache;  
+            if ( cache.length < MAXDIGITS ) {
+                
+                cache = this.state.cache;
+                if( cache[0] === '0' && !this.state.dataDot ){
+                    cache.shift();
+                }  
                 cache.push ( inputObject.number );
                 this.setState({
                     cache,
                     cancelBtnDisplay: 'C',
                     acFlag: true
                 })
-  
+
                 displayLength = cache.join( '' ).length;
                 resultDisplay = cache.join( '' );
                 this.setState({
                     resultDisplay
                 })
+                
+                
   
               // Update font size when over 10 characters
               if( displayLength > 10 ) {
@@ -89,8 +106,11 @@ class Calculator extends Component{
   
   
         } else if ( inputObject.type === 'operator' ) {
+
+            if( this.state.numCache.length > 1 && this.state.funcCache.length > 0 ){
+                this.calculateSomeShit( numCache, funcCache[0], true );
+            }
   
-            // cache = [];
             funcCache = this.state.funcCache;
             funcCache.push( Object.keys(inputObject)[1] );
             this.setState({
@@ -111,12 +131,16 @@ class Calculator extends Component{
   
   
             if ( inputObject.equals ){
-  
-                this.calculateSomeShit( numCache, funcCache[0], true );
-  
+                
+                if( funcCache[0] !== 'equals' ){
+                    this.calculateSomeShit( numCache, funcCache[0], true );
+                }else{
+                    return;
+                }
+                
             } else {
   
-                this.calculateSomeShit( numCache, Object.keys(inputObject)[1], 1 );
+                this.calculateSomeShit( numCache, Object.keys(inputObject)[1] );
   
             }
             
@@ -178,7 +202,6 @@ class Calculator extends Component{
   
             }
             
-  
           } else if ( inputObject.pm ) {
 
             cache = this.state.cache;
@@ -213,11 +236,15 @@ class Calculator extends Component{
                     resultDisplay: percentage
                 }
             )
+
+            } else if ( inputObject.type === 'sf' ) {
+
+                SpecialFunctions.sf(inputObject);
   
-          } else {
+            } else {
   
-            return;
-          }
+                return;
+            }
   
       }
   
@@ -232,7 +259,7 @@ class Calculator extends Component{
           }) 
     }
 
-    calculateSomeShit ( numCache, func, updateDisplay ) {
+    calculateSomeShit ( numCache, func, equals ) {
 
         var result, 
             calculate = CalcFunc.calculate,
@@ -240,18 +267,25 @@ class Calculator extends Component{
 
         if ( numCache[1] ) {
 
-          result = calculate(numCache[0], numCache[1], CalcFunc[func]);
-          numCache[1] = result;
-          numCache.shift();
-          funcCache.shift();
-
-          if ( updateDisplay ) {
+            result = calculate(numCache[0], numCache[1], CalcFunc[func]);
+            numCache[1] = result;
+            numCache.shift();
+            funcCache.shift();
 
             this.setState({
-                resultDisplay: result
+                resultDisplay: formatResult ( result, this.state.PRECISION, this.state.MAXDIGITS),
+                numCache,
+                funcCache,
+                result,
+                exp: false
             })
 
-          }
+            if(equals){
+                this.setState({
+                    numCache: [],
+                    funcCache: []
+                })
+            }          
           
         } else {
 
@@ -351,10 +385,94 @@ class Calculator extends Component{
   
             <main id="calculator" className="front" onKeyPress={this.handleKeyPress}>
         
-               <Screen content={this.state.resultDisplay} />
+               <Screen 
+                    content={this.state.resultDisplay} 
+                    exp={this.state.exp} 
+                    numCache={this.state.numCache} 
+                    rad={this.state.RadDeg === 'Rad'} 
+                    ext={this.props.ext}
+                    mem={this.state.mem > 0} />
 
                 <section className="buttons" id="keyPad">
+                    
+                    <div id="extended" className="extended">
+                        <div className="row">
+                            <button className="special-function top-row btn-col" id="left_b" onClick={this.handleClick} data-type="sf" data-lb>&#40;</button>
+                            <button className="special-function top-row btn-col" id="right_b" onClick={this.handleClick} data-type="sf" data-rb>&#41;</button>
+                            <button className="special-function top-row btn-col" onClick={this.handleClick} data-type="sf" data-mc>mc</button>
+                            <button className="special-function top-row btn-col right" onClick={this.handleClick} data-type="sf" data-mplus>m&#43;</button>
+                            <button className="special-function top-row btn-col" onClick={this.handleClick} data-type="sf" data-mminus>m&minus;</button>
+                            <button className="special-function top-row btn-col right" onClick={this.handleClick} data-type="sf" data-mr>mr</button>
+                        </div>
+                        <div className="row">
+                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-scnd>2<sup>nd</sup></button>
+                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-xsquared>x<sup>2</sup></button>
+                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-xcubed>x<sup>3</sup></button>
+                            <button className="special-function col right" onClick={this.handleClick} data-type="sf" data-xtty>x<sup>y</sup></button>
+                            <button className="special-function top-row btn-col" onClick={this.handleClick} data-type="sf" data-ettx>
+                                { this.state.scnd &&  
+                                    <span>y<sup>x</sup></span>      
+                                }
+
+                                { !this.state.scnd &&  
+                                    <span>e<sup>x</sup></span>      
+                                }
+                            
+                            </button>
+                            <button className="special-function top-row btn-col right" onClick={this.handleClick} data-type="sf" data-tenttx>
+                                { this.state.scnd &&  
+                                    <span>2<sup>x</sup></span>      
+                                }
+
+                                { !this.state.scnd &&  
+                                    <span>10<sup>x</sup></span>      
+                                }
+                            </button>
+                        </div>
+                        <div className="row">
+                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-onex>1/x</button>
+                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-sqroot>sqrt</button>
+                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-cuberoot>cbrt</button>
+                            <button className="special-function col right" onClick={this.handleClick} data-type="sf" data-nthroot>yxrt</button>
+                            <button className="special-function top-row btn-col" onClick={this.handleClick} data-type="sf" data-ln>
+                                { this.state.scnd &&  
+                                    <span>log<sub>y</sub></span>      
+                                }
+
+                                { !this.state.scnd &&  
+                                    <span>ln</span>      
+                                }
+                            </button>
+                            <button className="special-function top-row btn-col right" onClick={this.handleClick} data-type="sf" data-logten>
+                                { this.state.scnd &&  
+                                    <span>log<sub>2</sub></span>      
+                                }
+
+                                { !this.state.scnd &&  
+                                    <span>log<sub>10</sub></span>      
+                                }
+                                
+                            </button>
+                        </div>
+                        <div className="row">
+                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-factorial>x!</button>
+                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-sin>sin{ this.state.scnd && <sup>-1</sup>}</button>
+                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-cos>cos{ this.state.scnd && <sup>-1</sup>}</button>
+                            <button className="special-function col right" onClick={this.handleClick} data-type="sf" data-tan>tan{ this.state.scnd && <sup>-1</sup>}</button>
+                            <button className="special-function top-row btn-col" onClick={this.handleClick} data-type="sf" data-e>e</button>
+                            <button className="special-function top-row btn-col right" onClick={this.handleClick} data-type="sf" data-ee="divide">EE</button>
+                        </div>
+                        <div className="row">
+                            <button className="special-function col btm-left-radius" onClick={this.handleClick} data-type="sf" data-rad>{this.state.RadDeg === 'Deg' ? 'Rad' : 'Deg'}</button>
+                            <button className="special-function dot col" onClick={this.handleClick} data-type="sf" data-sinh>sinh{ this.state.scnd && <sup>-1</sup>}</button>
+                            <button className="special-function col right" onClick={this.handleClick} data-type="sf" data-cosh>cosh{ this.state.scnd && <sup>-1</sup>}</button>
+                            <button className="special-function top-row btn-col" onClick={this.handleClick} data-type="sf" data-tanh>tanh{ this.state.scnd && <sup>-1</sup>}</button>
+                            <button className="special-function top-row btn-col right" onClick={this.handleClick} data-type="sf" data-pi>&pi;</button>
+                            <button className="special-function top-row btn-col" onClick={this.handleClick} data-type="sf" data-rand>Rand</button>
+                        </div>
+                    </div>
                     <div id="compact" className="compact">
+                        
                         <div className="row">
                             <button className="special-function top-row btn-col" id="cancelBtn" onClick={this.handleClick} data-type="sf" data-ac>{this.state.cancelBtnDisplay}</button>
                             <button className="special-function top-row btn-col" onClick={this.handleClick} data-type="sf" data-pm="plusmn">
@@ -395,48 +513,7 @@ class Calculator extends Component{
                             <button className="operator col right btm-right-radius" onClick={this.handleClick} data-type="operator" data-equals>&#61;</button>
                         </div>
                     </div>
-                    <div id="extended" className="extended">
-                        <div className="row">
-                            <button className="special-function top-row btn-col" id="left_b" onClick={this.handleClick} data-type="sf" data-lb>&#40;</button>
-                            <button className="special-function top-row btn-col" id="right_b" onClick={this.handleClick} data-type="sf" data-rb>&#41;</button>
-                            <button className="special-function top-row btn-col" onClick={this.handleClick} data-type="sf" data-mc>mc</button>
-                            <button className="special-function top-row btn-col right" onClick={this.handleClick} data-type="sf" data-mplus>m&#43;</button>
-                            <button className="special-function top-row btn-col" onClick={this.handleClick} data-type="sf" data-mminus>m&minus;</button>
-                            <button className="special-function top-row btn-col right" onClick={this.handleClick} data-type="sf" data-mr>mr</button>
-                        </div>
-                        <div className="row">
-                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-scnd>2<sup>nd</sup></button>
-                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-xsquared>x<sup>2</sup></button>
-                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-xcubed>x<sup>3</sup></button>
-                            <button className="special-function col right" onClick={this.handleClick} data-type="sf" data-xtty>x<sup>y</sup></button>
-                            <button className="special-function top-row btn-col" onClick={this.handleClick} data-type="sf" data-ettx>e<sup>x</sup></button>
-                            <button className="special-function top-row btn-col right" onClick={this.handleClick} data-type="sf" data-tenttx>10<sup>x</sup></button>
-                        </div>
-                        <div className="row">
-                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-onex>4</button>
-                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-sqroot>5</button>
-                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-cuberoot>6</button>
-                            <button className="special-function col right" onClick={this.handleClick} data-type="sf" data-nthroot>&minus;</button>
-                            <button className="special-function top-row btn-col" onClick={this.handleClick} data-type="sf" data-ln>ln</button>
-                            <button className="special-function top-row btn-col right" onClick={this.handleClick} data-type="sf" data-logten>log<sub>10</sub></button>
-                        </div>
-                        <div className="row">
-                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-factorial>x!</button>
-                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-sin>sin</button>
-                            <button className="special-function col" onClick={this.handleClick} data-type="sf" data-cos>cos</button>
-                            <button className="special-function col right" onClick={this.handleClick} data-type="sf" data-tan>tan</button>
-                            <button className="special-function top-row btn-col" onClick={this.handleClick} data-type="sf" data-e>e</button>
-                            <button className="special-function top-row btn-col right" onClick={this.handleClick} data-type="sf" data-ee="divide">EE</button>
-                        </div>
-                        <div className="row">
-                            <button className="special-function col btm-left-radius" onClick={this.handleClick} data-type="sf" data-rad>Rad</button>
-                            <button className="special-function dot col" onClick={this.handleClick} data-type="sf" data-sinh>sinh</button>
-                            <button className="special-function col right" onClick={this.handleClick} data-type="sf" data-cosh>cosh</button>
-                            <button className="special-function top-row btn-col" onClick={this.handleClick} data-type="sf" data-tanh>tanh</button>
-                            <button className="special-function top-row btn-col right" onClick={this.handleClick} data-type="sf" data-pi>&pi;</button>
-                            <button className="special-function top-row btn-col" onClick={this.handleClick} data-type="sf" data-rand>Rand</button>
-                        </div>
-                    </div>
+                    
                 </section>
                  
 
@@ -446,20 +523,20 @@ class Calculator extends Component{
     }
 }
 
-// // Make sure result is not too big for display
-// function formatResult ( result ) {
+// Make sure result is not too big for display
+function formatResult ( result, PRECISION, MAXDIGITS ) {
 
-//     // Number.
-//     if ( !isNaN ( result ) && result.toExponential().length > MAXDIGITS ) {
+    // Number.
+    if ( !isNaN ( result ) && result.toExponential().length > MAXDIGITS ) {
 
-//       return result.toPrecision( PRECISION ).replace ( /\+/g, '');
+      return result.toPrecision( PRECISION ).replace ( /\+/g, '');
 
-//     } else {
+    } else {
 
-//       return result;
+      return result;
 
-//     }
+    }
 
-// }
+}
 
 export default Calculator;
