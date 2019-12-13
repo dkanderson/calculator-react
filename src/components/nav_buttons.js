@@ -5,9 +5,9 @@ function NavButtons(props){
     return(
             <header className="nav-buttons">
                 <nav id="nav-buttons" className="control-btns flip-out">
-                    <button className="close" data-close></button>
-                    <button className="minimize" data-minimize></button>
-                    <button id="flipper" className="flip" data-flip onClick={props.toggle}></button>
+                    <button className="close-btn" data-close><i>x</i></button>
+                    <button className="minimize-btn" data-minimize><i>&minus;</i></button>
+                    <button id="flipper" className="flip expand-btn" data-flip onClick={props.toggle}><i>&#43;</i></button>
                 </nav>
             </header> 
 
